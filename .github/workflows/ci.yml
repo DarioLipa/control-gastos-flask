@@ -26,6 +26,6 @@ jobs:
     - name: Ejecutar Pruebas Automatizadas
       env:
         FLASK_ENV: testing
+        PYTHONPATH: .
       run: |
-        pytest -v
-
+        python -m pytest -v
