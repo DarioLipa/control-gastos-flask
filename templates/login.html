@@ -12,17 +12,47 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/panda.css') }}">
 </head>
 <body class="login-body">
-  <div class="login-card">
-    <!-- ENCABEZADO CON LOGO DE MARCA -->
-    <div class="login-header">
-      <div style="display: flex; justify-content: center; margin-bottom: 0.5rem;">
-        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Logo Dali_Gastos" width="56" height="56">
-      </div>
-      <h1 class="login-title">Dali<span style="color: var(--accent-emerald);">_Gastos</span></h1>
-      <p class="login-desc">Control y Gestión Financiera Inteligente</p>
+  <!-- FONDO CON FORMAS ABSTRACTAS DIFUMINADAS Y ONDAS DECORATIVAS MODERNAS -->
+  <div class="login-bg-decor" aria-hidden="true">
+    <div class="decor-blob blob-coral"></div>
+    <div class="decor-blob blob-fuchsia"></div>
+    <div class="decor-blob blob-purple"></div>
+    <div class="decor-blob blob-violet"></div>
+    <div class="decor-blob blob-center"></div>
+
+    <svg class="decor-waves" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="loginWaveGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FF9B50" stop-opacity="0.32"/>
+          <stop offset="50%" stop-color="#FF23A7" stop-opacity="0.22"/>
+          <stop offset="100%" stop-color="#AF00D4" stop-opacity="0.28"/>
+        </linearGradient>
+        <linearGradient id="loginWaveGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#AF00D4" stop-opacity="0.28"/>
+          <stop offset="60%" stop-color="#F52D96" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#3920BC" stop-opacity="0.32"/>
+        </linearGradient>
+        <linearGradient id="loginWaveLine" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#FF9A52" stop-opacity="0.55"/>
+          <stop offset="50%" stop-color="#FF579A" stop-opacity="0.75"/>
+          <stop offset="100%" stop-color="#AF00D4" stop-opacity="0.55"/>
+        </linearGradient>
+      </defs>
+      <path d="M0,640 C280,560 520,740 780,650 C1040,560 1260,690 1440,610 L1440,900 L0,900 Z" fill="url(#loginWaveGrad2)"/>
+      <path d="M0,340 C340,440 680,260 1000,370 C1220,440 1360,320 1440,350 L1440,900 L0,900 Z" fill="url(#loginWaveGrad1)"/>
+      <path d="M0,490 C360,390 740,590 1100,450 C1280,380 1380,420 1440,400" stroke="url(#loginWaveLine)" stroke-width="2.5" fill="none"/>
+    </svg>
+  </div>
+
+  <!-- TARJETA BLANCA CENTRADA (440PX) -->
+  <main class="login-card">
+    <!-- 1. LOGOTIPO DE DALI_GASTOS -->
+    <div class="login-brand-header">
+      <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Logo Dali_Gastos" width="46" height="46" class="login-logo-img">
+      <span class="login-brand-title">Dali<span>_Gastos</span></span>
     </div>
 
-    <!-- MASCOTA PANDA INTERACTIVA -->
+    <!-- 2. PANDA ANIMADO -->
     <div id="pandaWrapper" class="panda-wrapper">
       <svg class="panda-svg" viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -43,9 +73,8 @@
           <!-- Cara blanca -->
           <ellipse cx="100" cy="94" rx="64" ry="54" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
 
-          <!-- Mancha ocular izquierda -->
+          <!-- Manchas oculares -->
           <ellipse cx="76" cy="90" rx="17" ry="21" fill="#0F172A" transform="rotate(-15 76 90)"/>
-          <!-- Mancha ocular derecha -->
           <ellipse cx="124" cy="90" rx="17" ry="21" fill="#0F172A" transform="rotate(15 124 90)"/>
 
           <!-- Ojo izquierdo -->
@@ -69,26 +98,22 @@
           <path d="M 96 117 Q 100 120 104 117" stroke="#0F172A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
 
           <!-- Mejillas sonrosadas suaves -->
-          <circle cx="58" cy="106" r="6" fill="#F43F5E" opacity="0.3"/>
-          <circle cx="142" cy="106" r="6" fill="#F43F5E" opacity="0.3"/>
+          <circle cx="58" cy="106" r="6" fill="#FF579A" opacity="0.35"/>
+          <circle cx="142" cy="106" r="6" fill="#FF579A" opacity="0.35"/>
         </g>
 
         <!-- PATAS DELANTERAS (SE MUEVEN PARA TAPAR LOS OJOS) -->
-        <!-- Pata Izquierda -->
         <g class="panda-paw-left" id="pawLeft">
           <ellipse cx="58" cy="158" rx="20" ry="17" fill="url(#pawShade)"/>
           <circle cx="58" cy="158" r="9" fill="#475569"/>
-          <!-- Almohadillas de dedos -->
           <circle cx="48" cy="148" r="4" fill="#64748B"/>
           <circle cx="58" cy="144" r="4" fill="#64748B"/>
           <circle cx="68" cy="148" r="4" fill="#64748B"/>
         </g>
 
-        <!-- Pata Derecha -->
         <g class="panda-paw-right" id="pawRight">
           <ellipse cx="142" cy="158" rx="20" ry="17" fill="url(#pawShade)"/>
           <circle cx="142" cy="158" r="9" fill="#475569"/>
-          <!-- Almohadillas de dedos -->
           <circle cx="132" cy="148" r="4" fill="#64748B"/>
           <circle cx="142" cy="144" r="4" fill="#64748B"/>
           <circle cx="152" cy="148" r="4" fill="#64748B"/>
@@ -96,34 +121,38 @@
       </svg>
     </div>
 
-    <!-- ALERTAS Y MENSAJES -->
+    <!-- MENSAJES DE ERROR SI APLICAN -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <div class="alert-container" style="margin-bottom: 1.25rem;">
+        <div class="login-alert-container">
           {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-              <span>{{ message }}</span>
-            </div>
+            {% if category in ['danger', 'error'] %}
+              <div class="login-alert-error">
+                <span>{{ message }}</span>
+              </div>
+            {% endif %}
           {% endfor %}
         </div>
       {% endif %}
     {% endwith %}
 
     <!-- FORMULARIO DE ACCESO -->
-    <form action="{{ url_for('login') }}" method="POST">
+    <form action="{{ url_for('login') }}" method="POST" class="login-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-      <div class="form-group" style="margin-bottom: 1.1rem;">
-        <label for="username">Usuario</label>
-        <input type="text" id="username" name="username" class="form-control" placeholder="Nombre de usuario" required autocomplete="username" autofocus>
+      <!-- 3. CAMPO USUARIO -->
+      <div class="login-field-group">
+        <label for="username" class="login-field-label">Usuario</label>
+        <input type="text" id="username" name="username" class="login-input-control" placeholder="Nombre de usuario" required autocomplete="username" autofocus>
       </div>
 
-      <div class="form-group" style="margin-bottom: 1.5rem;">
-        <label for="password">Contraseña</label>
-        <div class="password-input-group">
-          <input type="password" id="password" name="password" class="form-control" placeholder="Contraseña de acceso" required autocomplete="current-password">
-          <button type="button" id="togglePassword" class="btn-toggle-password" aria-label="Mostrar contraseña">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- 4. CAMPO CONTRASEÑA Y 5. BOTÓN MOSTRAR/OCULTAR -->
+      <div class="login-field-group">
+        <label for="password" class="login-field-label">Contraseña</label>
+        <div class="password-input-wrapper">
+          <input type="password" id="password" name="password" class="login-input-control" placeholder="Contraseña de acceso" required autocomplete="current-password">
+          <button type="button" id="togglePassword" class="login-toggle-btn" aria-label="Mostrar contraseña">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
@@ -131,16 +160,12 @@
         </div>
       </div>
 
-      <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 1rem;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-          <polyline points="10 17 15 12 10 7"></polyline>
-          <line x1="15" y1="12" x2="3" y2="12"></line>
-        </svg>
-        Ingresar al Sistema
+      <!-- 6. BOTÓN INICIAR SESIÓN -->
+      <button type="submit" class="login-submit-button">
+        Iniciar sesión
       </button>
     </form>
-  </div>
+  </main>
 
   <script src="{{ url_for('static', filename='js/panda.js') }}"></script>
 </body>

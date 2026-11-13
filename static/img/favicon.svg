@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
   <defs>
     <linearGradient id="favGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10B981"/>
-      <stop offset="100%" stop-color="#1E3A8A"/>
+      <stop offset="0%" stop-color="#FF9B50"/>
+      <stop offset="50%" stop-color="#FF23A7"/>
+      <stop offset="100%" stop-color="#AF00D4"/>
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="14" fill="url(#favGrad)"/>
-  <!-- D estilizada con símbolo financiero -->
+  <!-- D estilizada con símbolo financiero en paleta oficial -->
   <path d="M 16 14 L 34 14 C 46 14 54 22 54 32 C 54 42 46 50 34 50 L 16 50 Z" fill="#FFFFFF"/>
   <path d="M 24 22 L 33 22 C 40 22 45 26 45 32 C 45 38 40 42 33 42 L 24 42 Z" fill="url(#favGrad)"/>
-  <circle cx="34" cy="32" r="4" fill="#F59E0B"/>
+  <circle cx="34" cy="32" r="4" fill="#FF9A52"/>
 </svg>
-

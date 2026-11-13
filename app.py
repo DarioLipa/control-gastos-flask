@@ -120,7 +120,6 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('Has cerrado sesión correctamente.', 'info')
     return redirect(url_for('login'))
 
 # ==========================================================

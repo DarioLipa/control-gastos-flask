@@ -1,22 +1,167 @@
 /* ==========================================================
-   Dali_Gastos - Estilos para Mascota Panda Interactiva
+   Dali_Gastos - Estilos para Inicio de Sesión y Mascota Panda
+   Paleta Oficial: Fucsia, Rosado, Coral y Morado
    ========================================================== */
 
+/* CUERPO DEL LOGIN: FONDO TRABAJADO CON DEGRADADO Y FORMAS ABSTRACTAS */
+.login-body {
+  margin: 0;
+  padding: 1.5rem 1rem;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, #FF9A52 0%, #FF6075 30%, #F52D96 65%, #7000BC 100%);
+  background-attachment: fixed;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+
+/* CONTENEDOR DE FORMAS ABSTRACTAS, ONDAS Y TEXTURAS DE FONDO */
+.login-bg-decor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Manchas orgánicas difuminadas en tonos oficiales */
+.decor-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.blob-coral {
+  width: 520px;
+  height: 520px;
+  top: -140px;
+  left: -120px;
+  background: radial-gradient(circle, #FFA366 0%, #FF6B8B 70%, transparent 100%);
+  opacity: 0.7;
+}
+
+.blob-fuchsia {
+  width: 480px;
+  height: 480px;
+  top: 10%;
+  right: -90px;
+  background: radial-gradient(circle, #FF23A7 0%, #F52D96 70%, transparent 100%);
+  opacity: 0.65;
+}
+
+.blob-purple {
+  width: 560px;
+  height: 560px;
+  bottom: -160px;
+  right: -100px;
+  background: radial-gradient(circle, #AF00D4 0%, #3920BC 70%, transparent 100%);
+  opacity: 0.7;
+}
+
+.blob-violet {
+  width: 440px;
+  height: 440px;
+  bottom: 5%;
+  left: -80px;
+  background: radial-gradient(circle, #B900CE 0%, #7000BC 70%, transparent 100%);
+  opacity: 0.55;
+}
+
+.blob-center {
+  width: 380px;
+  height: 380px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #FF9B50 0%, #FF579A 80%, transparent 100%);
+  opacity: 0.25;
+}
+
+/* Ondas y curvas vectoriales suaves de fondo */
+.decor-waves {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.85;
+}
+
+/* ==========================================================
+   TARJETA BLANCA CENTRADA (440PX)
+   ========================================================== */
+.login-card {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 440px; /* Ancho exacto entre 420px y 460px */
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 2.5rem 2.25rem 2.25rem;
+  box-shadow: 0 25px 60px -10px rgba(112, 0, 188, 0.35),
+              0 15px 30px -5px rgba(245, 45, 150, 0.25),
+              0 0 0 1px rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  box-sizing: border-box;
+}
+
+/* 1. LOGOTIPO CENTRADO */
+.login-brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.login-logo-img {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.login-brand-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.login-brand-title span {
+  background: linear-gradient(135deg, #FF579A 0%, #AF00D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 2. PANDA ANIMADO */
 .panda-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
   position: relative;
 }
 
 .panda-svg {
-  width: 140px;
-  height: 125px;
+  width: 135px;
+  height: 120px;
   overflow: visible;
 }
 
-/* Transiciones suaves en partes móviles */
+/* Transiciones suaves en partes móviles del panda */
 .panda-head {
   transform-origin: 100px 90px;
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -33,7 +178,6 @@
   transition: transform 0.35s cubic-bezier(0.34, 1.3, 0.64, 1);
 }
 
-/* Estado normal: Patas abajo */
 .panda-paw-left {
   transform: translate(0, 0);
 }
@@ -42,7 +186,7 @@
   transform: translate(0, 0);
 }
 
-/* Estado TAPARSE LOS OJOS (Focus en Password) */
+/* Estado TAPARSE LOS OJOS (Focus en Contraseña) */
 .panda-wrapper.covering-eyes .panda-paw-left {
   transform: translate(24px, -62px) rotate(22deg);
 }
@@ -51,19 +195,18 @@
   transform: translate(-24px, -62px) rotate(-22deg);
 }
 
-/* Cerrar ojos suavemente al taparse */
 .panda-wrapper.covering-eyes .panda-eye-white {
   opacity: 0.1;
   transition: opacity 0.2s ease;
 }
 
-/* Estado ESPIAR (Show Password activo) */
+/* Estado ESPIAR (Mostrar Contraseña activo) */
 .panda-wrapper.peeking .panda-paw-left {
   transform: translate(24px, -62px) rotate(22deg);
 }
 
 .panda-wrapper.peeking .panda-paw-right {
-  transform: translate(-10px, -46px) rotate(-8deg); /* Pata derecha baja un poco para espiar */
+  transform: translate(-10px, -46px) rotate(-8deg);
 }
 
 .panda-wrapper.peeking .panda-eye-white.eye-right {
@@ -74,23 +217,87 @@
   transform: translate(2px, 1px) scale(0.9);
 }
 
-/* Botón Mostrar/Ocultar Contraseña */
-.password-input-group {
+/* ALERTA DE ERROR */
+.login-alert-container {
+  margin-bottom: 1.15rem;
+  width: 100%;
+}
+
+.login-alert-error {
+  background: #FFF1F2;
+  border: 1px solid #FECDD3;
+  color: #BE123C;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* FORMULARIO Y CAMPOS */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 1.15rem;
+}
+
+.login-field-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.login-field-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 0.45rem;
+  text-align: left;
+  letter-spacing: 0.2px;
+}
+
+.login-input-control {
+  width: 100%;
+  height: 46px;
+  padding: 0.65rem 1rem;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: #0F172A;
+  background-color: #F8FAFC;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.login-input-control:focus {
+  background-color: #FFFFFF;
+  border-color: #AF00D4;
+  box-shadow: 0 0 0 4px rgba(175, 0, 212, 0.12);
+}
+
+/* 4. GRUPO CONTRASEÑA Y 5. BOTÓN MOSTRAR/OCULTAR */
+.password-input-wrapper {
   position: relative;
+  width: 100%;
   display: flex;
   align-items: center;
 }
 
-.password-input-group input {
-  padding-right: 2.75rem;
+.password-input-wrapper .login-input-control {
+  padding-right: 2.85rem !important;
 }
 
+#togglePassword,
+.login-toggle-btn,
 .btn-toggle-password {
   position: absolute;
-  right: 0.65rem;
+  right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  background: none;
+  background: transparent;
   border: none;
   color: #64748B;
   cursor: pointer;
@@ -100,14 +307,49 @@
   justify-content: center;
   border-radius: 6px;
   transition: color 0.15s ease, background-color 0.15s ease;
+  z-index: 2;
 }
 
+#togglePassword:hover,
+.login-toggle-btn:hover,
 .btn-toggle-password:hover {
-  color: #0F172A;
+  color: #AF00D4;
   background-color: #F1F5F9;
 }
 
-/* Respeto por preferencias de reducción de movimiento */
+/* 6. BOTÓN INICIAR SESIÓN */
+.login-submit-button {
+  width: 100%;
+  height: 48px;
+  background: linear-gradient(135deg, #FF579A 0%, #AF00D4 50%, #7000BC 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 10px 24px rgba(175, 0, 212, 0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+  margin-top: 0.35rem;
+  font-family: inherit;
+  letter-spacing: 0.2px;
+}
+
+.login-submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(175, 0, 212, 0.45);
+}
+
+.login-submit-button:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 16px rgba(175, 0, 212, 0.3);
+}
+
+/* COMPATIBILIDAD CON PREFERENCIAS DE REDUCCIÓN DE MOVIMIENTO */
 @media (prefers-reduced-motion: reduce) {
   .panda-head,
   .panda-pupil,
@@ -117,3 +359,21 @@
   }
 }
 
+/* ADAPTABILIDAD RESPONSIVA PARA MÓVIL Y TABLET */
+@media (max-width: 480px) {
+  .login-body {
+    padding: 1rem;
+  }
+  .login-card {
+    padding: 2rem 1.4rem 1.75rem;
+    border-radius: 20px;
+    max-width: 100%;
+  }
+  .login-brand-title {
+    font-size: 1.45rem;
+  }
+  .panda-svg {
+    width: 120px;
+    height: 108px;
+  }
+}
