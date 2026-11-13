@@ -57,20 +57,6 @@ Pantalla dedicada a la generación de balances filtrados por fechas y categoría
 
 ---
 
-## ⚙️ Instalación y Ejecución en Local
-
-En PowerShell (Windows):
-
-```powershell
-python -m pip install -r requirements.txt
-python app.py
-```
-
-Abre en tu navegador web:
-```
-http://127.0.0.1:5000
-```
-
 ### Credenciales de Demostración Local
 - **Usuario:** `admin`
 - **Contraseña:** `123`
