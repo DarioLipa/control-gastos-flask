@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes y Análisis{% endblock %}
+{% block page_title %}Generador Avanzado de Reportes{% endblock %}
+{% block page_subtitle %}Filtre por fechas, categorías y exporte a CSV o imprima sus balances financieros{% endblock %}
+
+{% block topbar_actions %}
+<div style="display: flex; gap: 0.75rem;">
+  <button onclick="window.print()" class="btn-secondary">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 6 2 18 2 18 9"></polyline>
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+      <rect x="6" y="14" width="12" height="8"></rect>
+    </svg>
+    Imprimir / PDF
+  </button>
+  <a href="{{ url_for('exportar_csv', fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, categoria=categoria_sel, buscar=buscar) }}" class="btn-success">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+      <polyline points="7 10 12 15 17 10"></polyline>
+      <line x1="12" y1="15" x2="12" y2="3"></line>
+    </svg>
+    Exportar a CSV
+  </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- FORMULARIO DE FILTROS SUPERIORES -->
+<div class="filter-card">
+  <form action="{{ url_for('reportes') }}" method="GET" class="filter-form-grid">
+    <div class="form-group">
+      <label for="fecha_inicio">Desde Fecha</label>
+      <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
+    </div>
+
+    <div class="form-group">
+      <label for="fecha_fin">Hasta Fecha</label>
+      <input type="date" id="fecha_fin" name="fecha_fin" class="form-control" value="{{ fecha_fin }}">
+    </div>
+
+    <div class="form-group">
+      <label for="categoria">Categoría</label>
+      <select id="categoria" name="categoria" class="form-control">
+        <option value="TODAS">Todas las Categorías</option>
+        {% for cat in categorias %}
+          <option value="{{ cat['categoria'] }}" {% if categoria_sel == cat['categoria'] %}selected{% endif %}>
+            {{ cat['categoria'] }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="buscar">Buscar en Descripción</label>
+      <input type="text" id="buscar" name="buscar" class="form-control" placeholder="Ej: Supermercado, Luz..." value="{{ buscar }}">
+    </div>
+
+    <div style="display: flex; gap: 0.5rem;">
+      <button type="submit" class="btn-primary" style="height: 42px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        </svg>
+        Filtrar
+      </button>
+      <a href="{{ url_for('reportes') }}" class="btn-secondary" style="height: 42px;" title="Limpiar todos los filtros">
+        Limpiar
+      </a>
+    </div>
+  </form>
+</div>
+
+<!-- TARJETAS DE RESULTADOS FILTRADOS (OCUPA TODO EL ANCHO) -->
+<section class="kpis-grid" style="margin-bottom: 1.5rem;">
+  <div class="kpi-card kpi-accent-green">
+    <div class="kpi-info">
+      <span class="kpi-title">Monto Total del Filtro</span>
+      <span class="kpi-value">${{ "%.2f"|format(total_filtrado) }}</span>
+      <span class="kpi-tag"><span class="tag-positive">Total Calculado</span></span>
+    </div>
+    <div class="kpi-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"></line>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+      </svg>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-info">
+      <span class="kpi-title">Total Registros Filtrados</span>
+      <span class="kpi-value">{{ cantidad_filtrada }}</span>
+      <span class="kpi-tag" style="color: var(--primary-ocean);">Coincidencias</span>
+    </div>
+    <div class="kpi-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+      </svg>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-info">
+      <span class="kpi-title">Promedio del Período</span>
+      <span class="kpi-value">${{ "%.2f"|format(promedio_filtrado) }}</span>
+      <span class="kpi-tag" style="color: var(--text-secondary);">Por transacción</span>
+    </div>
+    <div class="kpi-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+        <polyline points="17 6 23 6 23 12"></polyline>
+      </svg>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-info">
+      <span class="kpi-title">Gasto Máximo Filtrado</span>
+      <span class="kpi-value">${{ "%.2f"|format(maximo_filtrado) }}</span>
+      <span class="kpi-tag" style="color: #D97706;">Pico más alto</span>
+    </div>
+    <div class="kpi-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- TABLA DE RESULTADOS DE REPORTES -->
+<section class="table-card">
+  <div class="table-toolbar">
+    <h3 class="card-title">Detalle de Gastos Incluidos en el Reporte</h3>
+    <span class="card-badge">{{ cantidad_filtrada }} Filas</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Fecha</th>
+          <th>Descripción</th>
+          <th>Categoría</th>
+          <th style="text-align: right;">Monto ($)</th>
+          <th style="text-align: right;">Fecha de Creación</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in gastos %}
+        <tr>
+          <td style="color: var(--text-light); font-weight: 600;">#{{ g['id'] }}</td>
+          <td><strong>{{ g['fecha'] }}</strong></td>
+          <td style="font-weight: 600; color: var(--primary-navy);">{{ g['descripcion'] }}</td>
+          <td><span class="badge-category">{{ g['categoria'] }}</span></td>
+          <td style="text-align: right;" class="monto-col">${{ "%.2f"|format(g['monto']) }}</td>
+          <td style="text-align: right; font-size: 0.8rem; color: var(--text-secondary);">{{ g['created_at'] }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-light);">
+            No se encontraron gastos que coincidan con los filtros seleccionados.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      {% if gastos %}
+      <tfoot>
+        <tr style="background: #F8FDFF; border-top: 2px solid var(--border-card);">
+          <td colspan="4" style="text-align: right; font-weight: 700; color: var(--primary-navy);">SUMA TOTAL:</td>
+          <td style="text-align: right; font-weight: 800; font-size: 1.15rem; color: var(--accent-green); font-family: 'JetBrains Mono';">
+            ${{ "%.2f"|format(total_filtrado) }}
+          </td>
+          <td></td>
+        </tr>
+      </tfoot>
+      {% endif %}
+    </table>
+  </div>
+</section>
+
+<style>
+@media print {
+  .app-sidebar, .app-topbar, .filter-card, .btn-logout, .btn-secondary, .btn-success {
+    display: none !important;
+  }
+  .app-main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+  .content-body {
+    padding: 0 !important;
+  }
+  .table-card {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+</style>
+{% endblock %}

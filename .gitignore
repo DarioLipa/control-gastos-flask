@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.env
+.vscode/
+.idea/
+screenshots/test_profile/
+screenshots/chrome_profile/
