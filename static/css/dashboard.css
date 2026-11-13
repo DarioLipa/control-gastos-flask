@@ -241,7 +241,7 @@ body {
 }
 
 /* ==========================================================
-   KPIS GRID GENERAL (USADO EN REPORTES)
+   KPIS GRID GENERAL (USADO EN REPORTES) CON FONDOS DEGRADADOS
    ========================================================== */
 .kpis-grid {
   display: grid;
@@ -252,53 +252,79 @@ body {
 }
 
 .kpi-card {
-  background: #FFFFFF;
   border-radius: var(--radius-md);
-  padding: 1.25rem 1.4rem;
+  padding: 1.35rem 1.4rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid var(--border-light);
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+  border: none;
+  color: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.22), transparent 70%);
+  pointer-events: none;
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
 }
 
 .kpi-info {
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
 
 .kpi-title {
   font-size: 0.78rem;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.92);
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   margin-bottom: 0.35rem;
 }
 
 .kpi-value {
-  font-size: 1.7rem;
+  font-size: 1.85rem;
   font-weight: 800;
-  color: var(--text-main);
+  color: #FFFFFF;
   letter-spacing: -0.5px;
+  line-height: 1.15;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .kpi-note {
-  font-size: 0.74rem;
-  margin-top: 0.3rem;
-  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-top: 0.35rem;
+  color: rgba(255, 255, 255, 0.88);
   font-weight: 500;
 }
 
 .kpi-icon-wrap {
-  width: 46px;
-  height: 46px;
-  min-width: 46px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F1F5F9;
+  background: rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(6px);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
 }
 
 .kpi-icon-wrap svg {
@@ -306,38 +332,51 @@ body {
   height: 22px;
   max-width: 22px;
   max-height: 22px;
+  stroke: #FFFFFF;
 }
 
-.kpi-card.kpi-emerald {
-  border-top: 4px solid var(--accent-emerald);
+/* Degradado 1: Rosa a Morado (#FF579A -> #AF00D4) */
+.kpi-card.kpi-emerald,
+.kpi-card.kpi-grad-pink-purple {
+  background: linear-gradient(135deg, #FF579A 0%, #AF00D4 100%);
+  box-shadow: 0 10px 24px rgba(175, 0, 212, 0.28);
 }
-.kpi-card.kpi-emerald .kpi-icon-wrap {
-  background: #ECFDF5;
-  color: var(--accent-emerald);
-}
-
-.kpi-card.kpi-blue {
-  border-top: 4px solid var(--accent-blue);
-}
-.kpi-card.kpi-blue .kpi-icon-wrap {
-  background: #EFF6FF;
-  color: var(--accent-blue);
+.kpi-card.kpi-emerald:hover,
+.kpi-card.kpi-grad-pink-purple:hover {
+  box-shadow: 0 14px 30px rgba(175, 0, 212, 0.38);
 }
 
-.kpi-card.kpi-purple {
-  border-top: 4px solid var(--sidebar-start);
+/* Degradado 2: Naranja a Rosa (#FF9B50 -> #FF23A7) */
+.kpi-card.kpi-blue,
+.kpi-card.kpi-grad-orange-pink {
+  background: linear-gradient(135deg, #FF9B50 0%, #FF23A7 100%);
+  box-shadow: 0 10px 24px rgba(255, 35, 167, 0.28);
 }
-.kpi-card.kpi-purple .kpi-icon-wrap {
-  background: #F5F3FF;
-  color: var(--sidebar-start);
+.kpi-card.kpi-blue:hover,
+.kpi-card.kpi-grad-orange-pink:hover {
+  box-shadow: 0 14px 30px rgba(255, 35, 167, 0.38);
 }
 
-.kpi-card.kpi-orange {
-  border-top: 4px solid var(--accent-orange);
+/* Degradado 3: Morado a Azul (#B900CE -> #1839C9) */
+.kpi-card.kpi-purple,
+.kpi-card.kpi-grad-purple-blue {
+  background: linear-gradient(135deg, #B900CE 0%, #1839C9 100%);
+  box-shadow: 0 10px 24px rgba(24, 57, 201, 0.28);
 }
-.kpi-card.kpi-orange .kpi-icon-wrap {
-  background: #FFFBEB;
-  color: var(--accent-orange);
+.kpi-card.kpi-purple:hover,
+.kpi-card.kpi-grad-purple-blue:hover {
+  box-shadow: 0 14px 30px rgba(24, 57, 201, 0.38);
+}
+
+/* Degradado 4: Esmeralda a Cian (#05BF85 -> #0E7490) */
+.kpi-card.kpi-orange,
+.kpi-card.kpi-grad-emerald-cyan {
+  background: linear-gradient(135deg, #05BF85 0%, #0E7490 100%);
+  box-shadow: 0 10px 24px rgba(5, 191, 133, 0.28);
+}
+.kpi-card.kpi-orange:hover,
+.kpi-card.kpi-grad-emerald-cyan:hover {
+  box-shadow: 0 14px 30px rgba(5, 191, 133, 0.38);
 }
 
 /* ==========================================================

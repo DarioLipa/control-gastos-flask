@@ -57,24 +57,6 @@ Pantalla dedicada a la generación de balances filtrados por fechas y categoría
 
 ---
 
-## 📊 Datos Iniciales de Demostración
-
-La base de datos SQLite se inicializa con los siguientes cinco registros de muestra:
-
-| Fecha | Categoría | Descripción | Monto |
-| :---: | :---: | :--- | :---: |
-| 09/11/2026 | Alimentación | Alimentación | S/ 35.50 |
-| 10/11/2026 | Movilidad | Movilidad | S/ 12.00 |
-| 11/11/2026 | Alquiler | Alquiler | S/ 480.00 |
-| 12/11/2026 | Vestimenta | Ropa | S/ 95.00 |
-| 13/11/2026 | Universidad | Universidad | S/ 260.00 |
-
-- **Total acumulado:** S/ 882.50
-- **Promedio por gasto:** S/ 176.50
-- **Categoría principal:** Alquiler (S/ 480.00)
-
----
-
 ## ⚙️ Instalación y Ejecución en Local
 
 En PowerShell (Windows):

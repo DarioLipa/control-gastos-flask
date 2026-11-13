@@ -8,10 +8,11 @@ from database import init_db, get_db_connection
 def client():
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False
-    init_db()
+    init_db(reset_demo_data=True)
 
     with app.test_client() as client:
         yield client
+    init_db(reset_demo_data=True)
 
 def login_client(client, username="admin", password="123"):
     return client.post('/login', data={
