@@ -1,12 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Reportes y Análisis{% endblock %}
-{% block page_title %}Generador Avanzado de Reportes{% endblock %}
-{% block page_subtitle %}Filtre por fechas, categorías y exporte a CSV o imprima sus balances financieros{% endblock %}
+{% block title %}Reportes{% endblock %}
+{% block page_title %}Reportes{% endblock %}
 
 {% block topbar_actions %}
 <div style="display: flex; gap: 0.75rem;">
-  <button onclick="window.print()" class="btn-secondary">
+  <button type="button" onclick="window.print()" class="btn-secondary">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="6 9 6 2 18 2 18 9"></polyline>
       <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
@@ -14,20 +13,21 @@
     </svg>
     Imprimir / PDF
   </button>
-  <a href="{{ url_for('exportar_csv', fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, categoria=categoria_sel, buscar=buscar) }}" class="btn-success">
+
+  <a href="{{ url_for('exportar_csv', fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, categoria=categoria_sel) }}" class="btn-primary">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
       <polyline points="7 10 12 15 17 10"></polyline>
       <line x1="12" y1="15" x2="12" y2="3"></line>
     </svg>
-    Exportar a CSV
+    Exportar CSV
   </a>
 </div>
 {% endblock %}
 
 {% block content %}
-<!-- FORMULARIO DE FILTROS SUPERIORES -->
-<div class="filter-card">
+<!-- FILTROS DE CONSULTA -->
+<div class="table-card" style="padding: 1.25rem 1.4rem;">
   <form action="{{ url_for('reportes') }}" method="GET" class="filter-form-grid">
     <div class="form-group">
       <label for="fecha_inicio">Desde Fecha</label>
@@ -42,41 +42,36 @@
     <div class="form-group">
       <label for="categoria">Categoría</label>
       <select id="categoria" name="categoria" class="form-control">
-        <option value="TODAS">Todas las Categorías</option>
-        {% for cat in categorias %}
-          <option value="{{ cat['categoria'] }}" {% if categoria_sel == cat['categoria'] %}selected{% endif %}>
-            {{ cat['categoria'] }}
+        <option value="">Todas las Categorías</option>
+        {% for cat in categorias_disponibles %}
+          <option value="{{ cat }}" {% if categoria_sel == cat %}selected{% endif %}>
+            {{ cat }}
           </option>
         {% endfor %}
       </select>
     </div>
 
-    <div class="form-group">
-      <label for="buscar">Buscar en Descripción</label>
-      <input type="text" id="buscar" name="buscar" class="form-control" placeholder="Ej: Supermercado, Luz..." value="{{ buscar }}">
-    </div>
-
     <div style="display: flex; gap: 0.5rem;">
-      <button type="submit" class="btn-primary" style="height: 42px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button type="submit" class="btn-primary" style="height: 38px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
         Filtrar
       </button>
-      <a href="{{ url_for('reportes') }}" class="btn-secondary" style="height: 42px;" title="Limpiar todos los filtros">
+      <a href="{{ url_for('reportes') }}" class="btn-secondary" style="height: 38px;" title="Restablecer filtros">
         Limpiar
       </a>
     </div>
   </form>
 </div>
 
-<!-- TARJETAS DE RESULTADOS FILTRADOS (OCUPA TODO EL ANCHO) -->
-<section class="kpis-grid" style="margin-bottom: 1.5rem;">
-  <div class="kpi-card kpi-accent-green">
+<!-- RESUMEN DE LA CONSULTA FILTRADA -->
+<section class="kpis-grid">
+  <div class="kpi-card kpi-emerald">
     <div class="kpi-info">
-      <span class="kpi-title">Monto Total del Filtro</span>
-      <span class="kpi-value">${{ "%.2f"|format(total_filtrado) }}</span>
-      <span class="kpi-tag"><span class="tag-positive">Total Calculado</span></span>
+      <span class="kpi-title">Total Filtrado</span>
+      <span class="kpi-value">S/ {{ "%.2f"|format(total_filtrado) }}</span>
+      <span class="kpi-note">Suma del período</span>
     </div>
     <div class="kpi-icon-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -86,11 +81,11 @@
     </div>
   </div>
 
-  <div class="kpi-card">
+  <div class="kpi-card kpi-blue">
     <div class="kpi-info">
-      <span class="kpi-title">Total Registros Filtrados</span>
+      <span class="kpi-title">Registros Encontrados</span>
       <span class="kpi-value">{{ cantidad_filtrada }}</span>
-      <span class="kpi-tag" style="color: var(--primary-ocean);">Coincidencias</span>
+      <span class="kpi-note">Transacciones</span>
     </div>
     <div class="kpi-icon-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -100,11 +95,11 @@
     </div>
   </div>
 
-  <div class="kpi-card">
+  <div class="kpi-card kpi-purple">
     <div class="kpi-info">
-      <span class="kpi-title">Promedio del Período</span>
-      <span class="kpi-value">${{ "%.2f"|format(promedio_filtrado) }}</span>
-      <span class="kpi-tag" style="color: var(--text-secondary);">Por transacción</span>
+      <span class="kpi-title">Promedio del Filtro</span>
+      <span class="kpi-value">S/ {{ "%.2f"|format(promedio_filtrado) }}</span>
+      <span class="kpi-note">Por registro</span>
     </div>
     <div class="kpi-icon-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -114,11 +109,11 @@
     </div>
   </div>
 
-  <div class="kpi-card">
+  <div class="kpi-card kpi-orange">
     <div class="kpi-info">
-      <span class="kpi-title">Gasto Máximo Filtrado</span>
-      <span class="kpi-value">${{ "%.2f"|format(maximo_filtrado) }}</span>
-      <span class="kpi-tag" style="color: #D97706;">Pico más alto</span>
+      <span class="kpi-title">Mayor Gasto del Filtro</span>
+      <span class="kpi-value">S/ {{ "%.2f"|format(maximo_filtrado) }}</span>
+      <span class="kpi-note">Monto máximo</span>
     </div>
     <div class="kpi-icon-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -128,11 +123,13 @@
   </div>
 </section>
 
-<!-- TABLA DE RESULTADOS DE REPORTES -->
-<section class="table-card">
+<!-- TABLA ORDENADA DE RESULTADOS -->
+<div class="table-card">
   <div class="table-toolbar">
-    <h3 class="card-title">Detalle de Gastos Incluidos en el Reporte</h3>
-    <span class="card-badge">{{ cantidad_filtrada }} Filas</span>
+    <h2 class="card-title" style="margin: 0;">Detalle de Gastos del Reporte</h2>
+    <span style="font-size: 0.8rem; background: var(--surface-hover); padding: 0.25rem 0.65rem; border-radius: var(--radius-full); font-weight: 600; color: var(--text-secondary);">
+      {{ cantidad_filtrada }} Filas
+    </span>
   </div>
 
   <div class="table-responsive">
@@ -143,34 +140,50 @@
           <th>Fecha</th>
           <th>Descripción</th>
           <th>Categoría</th>
-          <th style="text-align: right;">Monto ($)</th>
-          <th style="text-align: right;">Fecha de Creación</th>
+          <th>Detalle Adicional</th>
+          <th style="text-align: right;">Monto (S/)</th>
+          <th style="text-align: right;">Registrado</th>
         </tr>
       </thead>
       <tbody>
         {% for g in gastos %}
         <tr>
-          <td style="color: var(--text-light); font-weight: 600;">#{{ g['id'] }}</td>
+          <td style="color: var(--text-muted); font-weight: 600;">#{{ g['id'] }}</td>
           <td><strong>{{ g['fecha'] }}</strong></td>
-          <td style="font-weight: 600; color: var(--primary-navy);">{{ g['descripcion'] }}</td>
-          <td><span class="badge-category">{{ g['categoria'] }}</span></td>
-          <td style="text-align: right;" class="monto-col">${{ "%.2f"|format(g['monto']) }}</td>
-          <td style="text-align: right; font-size: 0.8rem; color: var(--text-secondary);">{{ g['created_at'] }}</td>
+          <td style="font-weight: 600; color: var(--text-main);">{{ g['descripcion'] }}</td>
+          <td>
+            <span class="badge-cat badge-{{ g['categoria']|replace(' ', '') }}">
+              {{ g['categoria'] }}
+            </span>
+          </td>
+          <td style="color: var(--text-secondary); font-size: 0.82rem;">
+            {% if g['categoria'] == 'Otros' and g['detalle_otro'] %}
+              <em>{{ g['detalle_otro'] }}</em>
+            {% else %}
+              <span style="color: var(--text-muted);">&mdash;</span>
+            {% endif %}
+          </td>
+          <td style="text-align: right;" class="monto-soles">
+            S/ {{ "%.2f"|format(g['monto']) }}
+          </td>
+          <td style="text-align: right; font-size: 0.78rem; color: var(--text-muted);">
+            {{ g['created_at'] }}
+          </td>
         </tr>
         {% else %}
         <tr>
-          <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-light);">
-            No se encontraron gastos que coincidan con los filtros seleccionados.
+          <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            No se encontraron gastos que coincidan con los criterios seleccionados.
           </td>
         </tr>
         {% endfor %}
       </tbody>
       {% if gastos %}
       <tfoot>
-        <tr style="background: #F8FDFF; border-top: 2px solid var(--border-card);">
-          <td colspan="4" style="text-align: right; font-weight: 700; color: var(--primary-navy);">SUMA TOTAL:</td>
-          <td style="text-align: right; font-weight: 800; font-size: 1.15rem; color: var(--accent-green); font-family: 'JetBrains Mono';">
-            ${{ "%.2f"|format(total_filtrado) }}
+        <tr style="background: #F8FAFC; border-top: 2px solid var(--border-light);">
+          <td colspan="5" style="text-align: right; font-weight: 700; color: var(--text-main);">SUMA TOTAL:</td>
+          <td style="text-align: right; font-weight: 800; font-size: 1.1rem; color: var(--accent-emerald); font-family: 'JetBrains Mono';">
+            S/ {{ "%.2f"|format(total_filtrado) }}
           </td>
           <td></td>
         </tr>
@@ -178,24 +191,22 @@
       {% endif %}
     </table>
   </div>
-</section>
+</div>
 
 <style>
 @media print {
-  .app-sidebar, .app-topbar, .filter-card, .btn-logout, .btn-secondary, .btn-success {
+  .app-sidebar, .app-topbar, .table-card:first-of-type, .btn-primary, .btn-secondary, .btn-logout {
     display: none !important;
   }
-  .app-main {
+  .app-main, .content-body {
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
-  }
-  .content-body {
-    padding: 0 !important;
+    background: #FFFFFF !important;
   }
   .table-card {
     box-shadow: none !important;
-    border: none !important;
+    border: 1px solid #CBD5E1 !important;
   }
 }
 </style>

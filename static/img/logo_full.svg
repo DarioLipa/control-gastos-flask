@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80" fill="none">
+  <defs>
+    <linearGradient id="daliGradFull" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="50%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#1E3A8A"/>
+    </linearGradient>
+  </defs>
+  <!-- Isotipo -->
+  <g transform="translate(8, 10) scale(0.5)">
+    <path d="M 24 16 L 62 16 C 88 16 106 34 106 60 C 106 86 88 104 62 104 L 24 104 Z" fill="url(#daliGradFull)"/>
+    <path d="M 42 34 L 60 34 C 76 34 88 46 88 60 C 88 74 76 86 60 86 L 42 86 Z" fill="#FFFFFF"/>
+    <rect x="48" y="62" width="6" height="16" rx="3" fill="#0284C7"/>
+    <rect x="58" y="52" width="6" height="26" rx="3" fill="#0EA5E9"/>
+    <rect x="68" y="42" width="6" height="36" rx="3" fill="#10B981"/>
+    <circle cx="71" cy="34" r="5" fill="#F59E0B"/>
+  </g>
+  <!-- Texto Principal -->
+  <text x="76" y="45" font-family="'Inter', -apple-system, sans-serif" font-size="28" font-weight="800" fill="#0F172A" letter-spacing="-0.5">Dali<tspan fill="#10B981">_Gastos</tspan></text>
+  <text x="78" y="62" font-family="'Inter', -apple-system, sans-serif" font-size="11" font-weight="600" fill="#64748B" letter-spacing="1">GESTIÓN FINANCIERA INTELIGENTE</text>
+</svg>

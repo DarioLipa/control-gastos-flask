@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Gastos{% endblock %}
+{% block page_title %}Gestión de Gastos{% endblock %}
+
+{% block topbar_actions %}
+<button type="button" class="btn-success" onclick="openGastoModal(false)">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"></line>
+    <line x1="5" y1="12" x2="19" y2="12"></line>
+  </svg>
+  Registrar Gasto
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- BARRA DE BÚSQUEDA Y FILTRADO RÁPIDO -->
+<div class="table-card">
+  <div class="table-toolbar">
+    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+      <h2 class="card-title" style="margin: 0;">Historial de Movimientos</h2>
+      <span style="font-size: 0.8rem; background: var(--surface-hover); padding: 0.25rem 0.65rem; border-radius: var(--radius-full); font-weight: 600; color: var(--text-secondary);">
+        {{ gastos|length }} Registros
+      </span>
+    </div>
+
+    <!-- FORMULARIO DE FILTROS -->
+    <form action="{{ url_for('gastos_view') }}" method="GET" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+      <!-- Búsqueda en vivo -->
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="filtroBusqueda" name="q" placeholder="Buscar por descripción..." value="{{ query_q }}">
+      </div>
+
+      <!-- Filtro Categoría -->
+      <select name="cat" class="form-control" style="width: auto; padding: 0.55rem 0.85rem;" onchange="this.form.submit()">
+        <option value="">Todas las Categorías</option>
+        {% for c in categorias_disponibles %}
+          <option value="{{ c }}" {% if query_cat == c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+
+      {% if query_q or query_cat %}
+        <a href="{{ url_for('gastos_view') }}" class="btn-secondary" style="padding: 0.55rem 0.85rem;" title="Limpiar filtros">
+          Limpiar
+        </a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- TABLA DE GASTOS COMPLETA -->
+  <div class="table-responsive">
+    <table class="custom-table" id="tablaGastos">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Fecha</th>
+          <th>Descripción</th>
+          <th>Categoría</th>
+          <th>Detalle Adicional</th>
+          <th style="text-align: right;">Monto (S/)</th>
+          <th style="text-align: center;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in gastos %}
+        <tr>
+          <td style="color: var(--text-muted); font-weight: 600;">#{{ g['id'] }}</td>
+          <td><strong>{{ g['fecha'] }}</strong></td>
+          <td class="col-desc" style="font-weight: 600; color: var(--text-main);">
+            {{ g['descripcion'] }}
+          </td>
+          <td class="col-cat">
+            <span class="badge-cat badge-{{ g['categoria']|replace(' ', '') }}">
+              {{ g['categoria'] }}
+            </span>
+          </td>
+          <td style="color: var(--text-secondary); font-size: 0.82rem;">
+            {% if g['categoria'] == 'Otros' and g['detalle_otro'] %}
+              <em>{{ g['detalle_otro'] }}</em>
+            {% else %}
+              <span style="color: var(--text-muted);">&mdash;</span>
+            {% endif %}
+          </td>
+          <td style="text-align: right;" class="monto-soles">
+            S/ {{ "%.2f"|format(g['monto']) }}
+          </td>
+          <td style="text-align: center;">
+            <div class="actions-group" style="justify-content: center;">
+              <!-- Botón Editar -->
+              <button 
+                type="button" 
+                class="btn-icon" 
+                title="Editar registro"
+                onclick='openGastoModal(true, {
+                  id: {{ g["id"] }},
+                  fecha: "{{ g["fecha"] }}",
+                  descripcion: {{ g["descripcion"]|tojson }},
+                  monto: {{ g["monto"] }},
+                  categoria: "{{ g["categoria"] }}",
+                  detalle_otro: {{ (g["detalle_otro"] or "")|tojson }}
+                })'>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+
+              <!-- Botón Eliminar con confirmación -->
+              <form action="{{ url_for('eliminar_gasto', id=g['id']) }}" method="POST" onsubmit="return confirm('¿Confirmas que deseas eliminar este gasto de S/ {{ "%.2f"|format(g['monto']) }}?');" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-icon delete" title="Eliminar registro">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+            No se encontraron gastos registrados. Haz clic en <strong>Registrar Gasto</strong> para añadir uno nuevo.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL UNIFICADO PARA CREAR / EDITAR GASTO -->
+<div id="modalGasto" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalGastoTitulo">Registrar Gasto</h3>
+      <button type="button" class="btn-icon" style="border:none;" onclick="closeGastoModal()">&times;</button>
+    </div>
+    <form id="formGasto" method="POST" action="{{ url_for('crear_gasto') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="gasto_fecha">Fecha *</label>
+          <input type="date" id="gasto_fecha" name="fecha" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label for="gasto_descripcion">Descripción *</label>
+          <input type="text" id="gasto_descripcion" name="descripcion" class="form-control" placeholder="Ej: Compra de víveres, combustible..." required maxlength="200">
+        </div>
+
+        <div class="form-group">
+          <label for="gasto_monto">Monto en Soles (S/) *</label>
+          <input type="number" id="gasto_monto" name="monto" class="form-control" step="0.01" min="0.01" placeholder="0.00" required>
+        </div>
+
+        <div class="form-group">
+          <label for="gasto_categoria">Categoría *</label>
+          <select id="gasto_categoria" name="categoria" class="form-control" required>
+            {% for c in categorias_disponibles %}
+              <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Campo condicional para categoría Otros -->
+        <div class="form-group" id="grupoDetalleOtro" style="display: none;">
+          <label for="gasto_detalle_otro">Detalle Adicional (Opcional para 'Otros')</label>
+          <input type="text" id="gasto_detalle_otro" name="detalle_otro" class="form-control" placeholder="Especificar detalle del gasto..." maxlength="150">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeGastoModal()">Cancelar</button>
+        <button type="submit" class="btn-success">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/gastos.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Página No Encontrada | Dali_Gastos</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body class="login-body">
+  <div class="login-card" style="text-align: center; max-width: 480px;">
+    <h1 style="font-size: 4rem; color: var(--accent-purple); font-weight: 800; margin-bottom: 0.5rem;">404</h1>
+    <h2 style="font-size: 1.4rem; color: var(--text-main); margin-bottom: 0.75rem;">Página no encontrada</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem;">
+      La ruta o recurso al que intentas acceder no existe o fue trasladado.
+    </p>
+    <a href="{{ url_for('dashboard') }}" class="btn-primary" style="display: inline-flex; justify-content: center;">
+      Volver al Dashboard
+    </a>
+  </div>
+</body>
+</html>

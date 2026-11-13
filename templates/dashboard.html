@@ -1,18 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard General{% endblock %}
-{% block page_title %}Dashboard de Gastos Financieros{% endblock %}
-{% block page_subtitle %}Visualización analítica en tiempo real &bull; Última actualización: {{ current_date }}{% endblock %}
+{% block title %}Inicio{% endblock %}
+{% block page_title %}Panel Financiero{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('gastos_view') }}" class="btn-primary">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"></line>
+    <line x1="5" y1="12" x2="19" y2="12"></line>
+  </svg>
+  Nuevo Gasto
+</a>
+{% endblock %}
 
 {% block content %}
-<!-- FILA DE KPIS (OCUPA TODO EL ANCHO) -->
+<!-- TARJETAS DE KPIS PRINCIPALES (ANCHO COMPLETO) -->
 <section class="kpis-grid">
-  <!-- KPI 1: GASTO TOTAL -->
-  <div class="kpi-card kpi-accent-navy">
+  <!-- GASTO TOTAL ACUMULADO -->
+  <div class="kpi-card kpi-emerald">
     <div class="kpi-info">
       <span class="kpi-title">Gasto Total Acumulado</span>
-      <span class="kpi-value">${{ "%.2f"|format(stats['total_gastos']) }}</span>
-      <span class="kpi-tag"><span class="tag-positive">Histórico Global</span></span>
+      <span class="kpi-value">S/ {{ "%.2f"|format(stats['total_gastos']) }}</span>
+      <span class="kpi-note">Balance general</span>
     </div>
     <div class="kpi-icon-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -22,12 +31,12 @@
     </div>
   </div>
 
-  <!-- KPI 2: GASTO DEL MES -->
-  <div class="kpi-card kpi-accent-green">
+  <!-- GASTOS DEL MES ACTUAL -->
+  <div class="kpi-card kpi-blue">
     <div class="kpi-info">
-      <span class="kpi-title">Gastos del Mes Actual</span>
-      <span class="kpi-value">${{ "%.2f"|format(total_mes) }}</span>
-      <span class="kpi-tag" style="color: var(--primary-ocean); font-weight: 600;">Mes en curso</span>
+      <span class="kpi-title">Gastos del Mes</span>
+      <span class="kpi-value">S/ {{ "%.2f"|format(total_mes) }}</span>
+      <span class="kpi-note">{{ nombre_mes }}</span>
     </div>
     <div class="kpi-icon-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -37,12 +46,19 @@
     </div>
   </div>
 
-  <!-- KPI 3: PROMEDIO POR GASTO -->
-  <div class="kpi-card">
+  <!-- COMPARACIÓN CON MES ANTERIOR -->
+  <div class="kpi-card kpi-purple">
     <div class="kpi-info">
-      <span class="kpi-title">Ticket Promedio</span>
-      <span class="kpi-value">${{ "%.2f"|format(stats['promedio_gasto']) }}</span>
-      <span class="kpi-tag" style="color: var(--text-secondary);">Por cada registro</span>
+      <span class="kpi-title">Variación Mensual</span>
+      {% if var_mes is not none %}
+        <span class="kpi-value" style="color: {% if var_mes > 0 %}var(--accent-red){% else %}var(--accent-emerald){% endif %};">
+          {% if var_mes > 0 %}+{% endif %}{{ "%.1f"|format(var_mes) }}%
+        </span>
+        <span class="kpi-note">vs. mes anterior</span>
+      {% else %}
+        <span class="kpi-value">--</span>
+        <span class="kpi-note">Primer mes registrado</span>
+      {% endif %}
     </div>
     <div class="kpi-icon-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -52,26 +68,27 @@
     </div>
   </div>
 
-  <!-- KPI 4: MAYOR GASTO -->
-  <div class="kpi-card">
+  <!-- PROMEDIO POR GASTO -->
+  <div class="kpi-card kpi-cyan">
     <div class="kpi-info">
-      <span class="kpi-title">Mayor Gasto Único</span>
-      <span class="kpi-value">${{ "%.2f"|format(stats['max_gasto']) }}</span>
-      <span class="kpi-tag" style="color: #D97706;">Pico más alto</span>
+      <span class="kpi-title">Promedio por Gasto</span>
+      <span class="kpi-value">S/ {{ "%.2f"|format(stats['promedio_gasto']) }}</span>
+      <span class="kpi-note">Por cada transacción</span>
     </div>
     <div class="kpi-icon-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M16 12l-4-4-4 4M12 16V9"></path>
       </svg>
     </div>
   </div>
 
-  <!-- KPI 5: TOTAL TRANSACCIONES -->
-  <div class="kpi-card">
+  <!-- TOTAL DE REGISTROS -->
+  <div class="kpi-card kpi-orange">
     <div class="kpi-info">
-      <span class="kpi-title">Total Transacciones</span>
+      <span class="kpi-title">Total Operaciones</span>
       <span class="kpi-value">{{ stats['total_registros'] }}</span>
-      <span class="kpi-tag" style="color: var(--primary-ocean);">Operaciones</span>
+      <span class="kpi-note">Transacciones</span>
     </div>
     <div class="kpi-icon-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -83,219 +100,68 @@
   </div>
 </section>
 
-<!-- SECCIÓN DE GRÁFICOS (ESTRUCTURA ALINEADA DE ANCHO COMPLETO) -->
-<section class="charts-grid">
-  <!-- GRÁFICO 1: TENDENCIA -->
+<!-- SECCIÓN DE GRÁFICOS Y ANÁLISIS VISUAL -->
+<section class="dashboard-grid-2">
+  <!-- GRÁFICO DE EVOLUCIÓN TEMPORAL -->
   <div class="dashboard-card">
     <div class="card-header-bar">
-      <div class="card-title-group">
-        <svg class="card-title-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-        </svg>
-        <h3 class="card-title">Evolución Cronológica de Gastos</h3>
-      </div>
-      <span class="card-badge">Histórico Diario</span>
+      <h2 class="card-title">Evolución de Gastos</h2>
+      <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Línea de tiempo</span>
     </div>
-    <div class="card-body-chart">
+    <div class="card-body" style="min-height: 270px; display: flex; align-items: center; justify-content: center;">
       <canvas id="chartTendencia" height="240"></canvas>
     </div>
   </div>
 
-  <!-- GRÁFICO 2: CATEGORÍAS -->
+  <!-- GRÁFICO DE DISTRIBUCIÓN POR CATEGORÍA -->
   <div class="dashboard-card">
     <div class="card-header-bar">
-      <div class="card-title-group">
-        <svg class="card-title-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <path d="M12 2a10 10 0 0 1 10 10h-10z"></path>
-        </svg>
-        <h3 class="card-title">Distribución por Categoría</h3>
-      </div>
-      <span class="card-badge">Participación</span>
+      <h2 class="card-title">Distribución por Categoría</h2>
+      <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Participación</span>
     </div>
-    <div class="card-body-chart">
+    <div class="card-body" style="min-height: 270px; display: flex; align-items: center; justify-content: center;">
       <canvas id="chartCategorias" height="240"></canvas>
     </div>
   </div>
 </section>
 
-<!-- TABLA PRINCIPAL DE GASTOS REGISTRADOS (ANCHO COMPLETO) -->
-<section class="table-card">
-  <div class="table-toolbar">
-    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-      <h3 class="card-title" style="margin: 0;">Registro Detallado de Gastos</h3>
-      <span class="card-badge">{{ gastos|length }} Registros Encontrados</span>
-    </div>
-    
-    <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
-      <div class="search-box">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input type="text" id="tablaBusqueda" placeholder="Buscar por descripción o categoría..." onkeyup="filtrarTabla()">
-      </div>
-      <a href="{{ url_for('exportar_csv') }}" class="btn-secondary" title="Descargar en formato CSV para Excel">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-        Descargar CSV
-      </a>
-    </div>
+<!-- SECCIÓN INFORMATIVA: RANKING DE CATEGORÍAS PRINCIPALES -->
+{% if top_categorias %}
+<section class="dashboard-card">
+  <div class="card-header-bar">
+    <h2 class="card-title">Categorías con Mayor Volumen</h2>
+    <a href="{{ url_for('gastos_view') }}" style="font-size: 0.82rem; color: var(--accent-blue); text-decoration: none; font-weight: 600;">
+      Ver todos los gastos &rarr;
+    </a>
   </div>
-
-  <div class="table-responsive">
-    <table class="custom-table" id="tablaGastos">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Fecha</th>
-          <th>Descripción del Gasto</th>
-          <th>Categoría</th>
-          <th style="text-align: right;">Monto ($)</th>
-          <th style="text-align: center;">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for g in gastos %}
-        <tr>
-          <td style="color: var(--text-light); font-weight: 600;">#{{ g['id'] }}</td>
-          <td><strong>{{ g['fecha'] }}</strong></td>
-          <td>
-            <div style="font-weight: 600; color: var(--primary-navy);">{{ g['descripcion'] }}</div>
-          </td>
-          <td>
-            <span class="badge-category">{{ g['categoria'] }}</span>
-          </td>
-          <td style="text-align: right;" class="monto-col">
-            ${{ "%.2f"|format(g['monto']) }}
-          </td>
-          <td style="text-align: center;">
-            <div class="actions-group" style="justify-content: center;">
-              <!-- Botón Editar -->
-              <button 
-                class="btn-icon" 
-                title="Editar Gasto"
-                onclick="editarGastoModal('{{ g['id'] }}', '{{ g['fecha'] }}', '{{ g['descripcion']|escape }}', '{{ g['monto'] }}', '{{ g['categoria'] }}')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-              </button>
-
-              <!-- Botón Eliminar con confirmación -->
-              <form action="{{ url_for('eliminar_gasto', id=g['id']) }}" method="POST" onsubmit="return confirm('¿Está seguro de eliminar este gasto de ${{ "%.2f"|format(g['monto']) }}?');" style="display:inline;">
-                <button type="submit" class="btn-icon delete" title="Eliminar Gasto">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                </button>
-              </form>
-            </div>
-          </td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-light);">
-            No hay gastos registrados todavía. ¡Haz clic en <strong>Nuevo Gasto</strong> para empezar!
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="card-body">
+    <div class="category-rank-list">
+      {% for cat in top_categorias %}
+      <div class="category-rank-item">
+        <div class="rank-header">
+          <span style="display: flex; align-items: center; gap: 0.5rem;">
+            <span class="badge-cat badge-{{ cat['categoria']|replace(' ', '') }}">{{ cat['categoria'] }}</span>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">({{ cat['cantidad'] }} registros)</span>
+          </span>
+          <span class="monto-soles">S/ {{ "%.2f"|format(cat['total_cat']) }}</span>
+        </div>
+        <div class="rank-bar-bg">
+          <div class="rank-bar-fill" style="width: {{ cat['porcentaje'] }}%; background: var(--accent-blue);"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
   </div>
 </section>
-
-<!-- MODAL PARA EDITAR GASTO -->
-<div id="modalEditarGasto" class="modal-overlay">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3 class="modal-title">Editar Gasto Registrado</h3>
-      <button class="alert-close" onclick="closeModal('modalEditarGasto')">&times;</button>
-    </div>
-    <form id="formEditarGasto" method="POST">
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="edit_fecha">Fecha *</label>
-          <input type="date" id="edit_fecha" name="fecha" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label for="edit_descripcion">Descripción *</label>
-          <input type="text" id="edit_descripcion" name="descripcion" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label for="edit_monto">Monto ($) *</label>
-          <input type="number" id="edit_monto" name="monto" class="form-control" step="0.01" min="0.01" required>
-        </div>
-        <div class="form-group">
-          <label for="edit_categoria">Categoría</label>
-          <select id="edit_categoria" name="categoria" class="form-control">
-            <option value="Alimentación">Alimentación</option>
-            <option value="Servicios">Servicios Básicos</option>
-            <option value="Transporte">Transporte / Combustible</option>
-            <option value="Tecnología">Tecnología & Software</option>
-            <option value="Salud">Salud & Bienestar</option>
-            <option value="Ocio">Ocio & Entretenimiento</option>
-            <option value="Equipamiento">Equipamiento & Oficina</option>
-            <option value="Otros">Otros</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-secondary" onclick="closeModal('modalEditarGasto')">Cancelar</button>
-        <button type="submit" class="btn-primary">Actualizar Gasto</button>
-      </div>
-    </form>
-  </div>
-</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-  window.chartLabels = {{ chart_labels|tojson }};
-  window.chartValues = {{ chart_values|tojson }};
+  window.trendLabels = {{ trend_labels|tojson }};
+  window.trendValues = {{ trend_values|tojson }};
   window.catLabels = {{ cat_labels|tojson }};
   window.catValues = {{ cat_values|tojson }};
-
-  document.addEventListener('DOMContentLoaded', function() {
-    if (typeof initCharts === 'function') {
-      initCharts();
-    }
-  });
-
-  // Filtrar tabla en tiempo real
-  function filtrarTabla() {
-    const input = document.getElementById('tablaBusqueda');
-    const filter = input.value.toLowerCase();
-    const table = document.getElementById('tablaGastos');
-    const tr = table.getElementsByTagName('tr');
-
-    for (let i = 1; i < tr.length; i++) {
-      const tds = tr[i].getElementsByTagName('td');
-      if (tds.length >= 4) {
-        const textDesc = tds[2].textContent || tds[2].innerText;
-        const textCat = tds[3].textContent || tds[3].innerText;
-        if (textDesc.toLowerCase().indexOf(filter) > -1 || textCat.toLowerCase().indexOf(filter) > -1) {
-          tr[i].style.display = "";
-        } else {
-          tr[i].style.display = "none";
-        }
-      }
-    }
-  }
-
-  // Cargar datos en Modal de Edición
-  function editarGastoModal(id, fecha, descripcion, monto, categoria) {
-    const form = document.getElementById('formEditarGasto');
-    form.action = `/gasto/${id}/editar`;
-    document.getElementById('edit_fecha').value = fecha;
-    document.getElementById('edit_descripcion').value = descripcion;
-    document.getElementById('edit_monto').value = parseFloat(monto).toFixed(2);
-    document.getElementById('edit_categoria').value = categoria;
-    openModal('modalEditarGasto');
-  }
 </script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}
