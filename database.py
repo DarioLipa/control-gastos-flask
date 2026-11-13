@@ -1,25 +1,17 @@
 import sqlite3
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 DB_NAME = os.environ.get("DATABASE_PATH", "gastos.db")
 
+# Catálogo centralizado oficial de categorías
 CATEGORIAS_VALIDAS = [
     "Alimentación",
-    "Transporte",
-    "Vivienda",
-    "Servicios básicos",
-    "Salud",
-    "Educación",
-    "Compras",
-    "Entretenimiento",
-    "Tecnología",
-    "Comunicación",
+    "Movilidad",
+    "Alquiler",
     "Vestimenta",
-    "Viajes",
-    "Deudas",
-    "Imprevistos",
+    "Universidad",
     "Otros"
 ]
 
@@ -28,11 +20,11 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-def init_db():
+def init_db(reset_demo_data=False):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Tabla de Usuarios con contraseña hasheada
+    # 1. Tabla de Usuarios con contraseña protegida por hash
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,7 +34,7 @@ def init_db():
         )
     """)
 
-    # Tabla de Gastos
+    # 2. Tabla de Gastos
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS gastos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,22 +47,11 @@ def init_db():
         )
     """)
 
-    # Migración de esquema si falta columna detalle_otro
+    # Migración de columnas si fueran necesarias
     cursor.execute("PRAGMA table_info(gastos)")
     columns = [col[1] for col in cursor.fetchall()]
     if "detalle_otro" not in columns:
         cursor.execute("ALTER TABLE gastos ADD COLUMN detalle_otro TEXT")
-
-    # Migración de usuarios: comprobar si tiene columna password o password_hash
-    cursor.execute("PRAGMA table_info(usuarios)")
-    user_cols = [col[1] for col in cursor.fetchall()]
-    if "password_hash" not in user_cols and "password" in user_cols:
-        cursor.execute("ALTER TABLE usuarios ADD COLUMN password_hash TEXT")
-        # Hashear contraseñas existentes
-        cursor.execute("SELECT id, password FROM usuarios")
-        for u in cursor.fetchall():
-            h = generate_password_hash(u[1])
-            cursor.execute("UPDATE usuarios SET password_hash = ? WHERE id = ?", (h, u[0]))
 
     # Usuario por defecto para práctica local: admin / 123
     admin_user = os.environ.get("ADMIN_USER", "admin")
@@ -82,37 +63,32 @@ def init_db():
         hash_pass = generate_password_hash(admin_pass)
         cursor.execute("INSERT INTO usuarios (username, password_hash) VALUES (?, ?)", (admin_user, hash_pass))
     else:
-        # Asegurarse de que el hash sea válido
         if not row[1] or not row[1].startswith(("pbkdf2:", "scrypt:")):
             hash_pass = generate_password_hash(admin_pass)
             cursor.execute("UPDATE usuarios SET password_hash = ? WHERE id = ?", (hash_pass, row[0]))
 
-    # Sembrar gastos de muestra si la tabla está vacía
+    if reset_demo_data:
+        cursor.execute("DELETE FROM gastos")
+
+    # Sembrar EXACTAMENTE los 5 registros requeridos si la tabla está vacía
     cursor.execute("SELECT COUNT(*) FROM gastos")
     count = cursor.fetchone()[0]
     if count == 0:
-        today = datetime.now()
-        sample_expenses = [
-            ((today - timedelta(days=14)).strftime('%Y-%m-%d'), 'Supermercado Metro - Víveres quincenales', 285.50, 'Alimentación', None),
-            ((today - timedelta(days=12)).strftime('%Y-%m-%d'), 'Recibo de Luz Enel y Agua Sedapal', 142.30, 'Servicios básicos', None),
-            ((today - timedelta(days=10)).strftime('%Y-%m-%d'), 'Combustible Gasohol 95 Primax', 90.00, 'Transporte', None),
-            ((today - timedelta(days=8)).strftime('%Y-%m-%d'), 'Cuota mensual Alquiler departamento', 650.00, 'Vivienda', None),
-            ((today - timedelta(days=7)).strftime('%Y-%m-%d'), 'Farmacia InkaFarma - Vitaminas y analgésicos', 48.90, 'Salud', None),
-            ((today - timedelta(days=5)).strftime('%Y-%m-%d'), 'Curso Online Especializado en Python & DevOps', 120.00, 'Educación', None),
-            ((today - timedelta(days=4)).strftime('%Y-%m-%d'), 'Entradas Cineplanet y combo familiar', 65.00, 'Entretenimiento', None),
-            ((today - timedelta(days=3)).strftime('%Y-%m-%d'), 'Pago plan celular Claro mensual', 55.90, 'Comunicación', None),
-            ((today - timedelta(days=2)).strftime('%Y-%m-%d'), 'Renovación licencia Cloud Hosting', 78.50, 'Tecnología', None),
-            ((today - timedelta(days=1)).strftime('%Y-%m-%d'), 'Zapatillas urbanas Ripley', 189.00, 'Vestimenta', None),
-            (today.strftime('%Y-%m-%d'), 'Reparación de cerrajería de emergencia', 45.00, 'Otros', 'Servicio de cerrajero')
+        cinco_gastos_iniciales = [
+            ('2026-11-09', 'Alimentación', 35.50, 'Alimentación', None),
+            ('2026-11-10', 'Movilidad', 12.00, 'Movilidad', None),
+            ('2026-11-11', 'Alquiler', 480.00, 'Alquiler', None),
+            ('2026-11-12', 'Ropa', 95.00, 'Vestimenta', None),
+            ('2026-11-13', 'Universidad', 260.00, 'Universidad', None)
         ]
         cursor.executemany("""
             INSERT INTO gastos (fecha, descripcion, monto, categoria, detalle_otro)
             VALUES (?, ?, ?, ?, ?)
-        """, sample_expenses)
+        """, cinco_gastos_iniciales)
 
     conn.commit()
     conn.close()
 
 if __name__ == '__main__':
-    init_db()
-    print("Base de datos Dali_Gastos inicializada con éxito.")
+    init_db(reset_demo_data=True)
+    print("Base de datos Dali_Gastos inicializada con exactamente 5 registros.")

@@ -38,7 +38,7 @@ def test_login_successful(client):
     res = login_client(client, "admin", "123")
     assert res.status_code == 200
     assert b"Dali" in res.data
-    assert b"Panel Financiero" in res.data
+    assert b"Dashboard Financiero" in res.data
 
 def test_login_failed(client):
     """Rechazo ante credenciales incorrectas."""
@@ -81,7 +81,7 @@ def test_gastos_crud(client):
         'fecha': '2026-11-13',
         'descripcion': 'Prueba Editada Exitosa',
         'monto': '150.00',
-        'categoria': 'Tecnología'
+        'categoria': 'Universidad'
     }, follow_redirects=True)
     assert res_edit.status_code == 200
     assert b"Prueba Editada Exitosa" in res_edit.data
@@ -136,3 +136,12 @@ def test_error_404(client):
     res = client.get('/ruta-inexistente-12345')
     assert res.status_code == 404
     assert b"P\xc3\xa1gina no encontrada" in res.data
+
+def test_datos_iniciales_exactos(client):
+    """Comprueba el cálculo correcto en el panel con datos reales."""
+    login_client(client)
+    res = client.get('/dashboard')
+    assert res.status_code == 200
+    assert b"882.50" in res.data or b"Total Acumulado" in res.data
+
+

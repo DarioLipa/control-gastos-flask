@@ -28,3 +28,4 @@ jobs:
         FLASK_ENV: testing
       run: |
         pytest -v
+

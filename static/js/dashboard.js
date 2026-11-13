@@ -1,180 +1,95 @@
 // ==========================================================
-// Dali_Gastos - Visualización de Gráficos Financieros
+// Dali_Gastos - Motor de Gráficos Financieros
+// Reproducción Fiel del Gráfico de Área con Curva y Degradado
 // ==========================================================
 
 document.addEventListener('DOMContentLoaded', function() {
-  initDashboardCharts();
+  initMainAreaChart();
 });
 
-function initDashboardCharts() {
-  if (typeof window.catLabels !== 'undefined' && typeof window.catValues !== 'undefined') {
-    renderCategoryDonut('chartCategorias', window.catLabels, window.catValues);
-  }
-
-  if (typeof window.trendLabels !== 'undefined' && typeof window.trendValues !== 'undefined') {
-    renderTrendChart('chartTendencia', window.trendLabels, window.trendValues);
-  }
-}
-
-// 1. Gráfico de Dona para Categorías
-function renderCategoryDonut(canvasId, labels, values) {
-  const canvas = document.getElementById(canvasId);
+function initMainAreaChart() {
+  const canvas = document.getElementById('chartEvolucionPrincipal');
   if (!canvas) return;
+
+  const rawLabels = window.trendLabels || [];
+  const rawValues = window.trendValues || [];
+
+  if (rawValues.length === 0) return;
 
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.getBoundingClientRect();
 
-  canvas.width = (rect.width || 420) * dpr;
-  canvas.height = (rect.height || 260) * dpr;
-  ctx.scale(dpr, dpr);
+  function resizeAndDraw() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const width = rect.width;
+    const height = Math.max(rect.height, 320);
 
-  const width = canvas.width / dpr;
-  const height = canvas.height / dpr;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
 
-  ctx.clearRect(0, 0, width, height);
+    ctx.resetTransform ? ctx.resetTransform() : ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
 
-  const total = values.reduce((sum, v) => sum + v, 0);
-
-  // Estado vacío
-  if (total === 0 || values.length === 0) {
-    ctx.fillStyle = '#94A3B8';
-    ctx.font = '500 13px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('No hay gastos registrados en el período', width / 2, height / 2);
-    return;
+    drawChart(ctx, width, height, rawLabels, rawValues);
   }
 
-  // Paleta de colores consistente para categorías
-  const categoryColors = {
-    'Alimentación': '#EA580C',
-    'Transporte': '#2563EB',
-    'Vivienda': '#4F46E5',
-    'Servicios básicos': '#0891B2',
-    'Salud': '#059669',
-    'Educación': '#7C3AED',
-    'Compras': '#DB2777',
-    'Entretenimiento': '#9333EA',
-    'Tecnología': '#0284C7',
-    'Comunicación': '#0D9488',
-    'Vestimenta': '#D97706',
-    'Viajes': '#0E7490',
-    'Deudas': '#DC2626',
-    'Imprevistos': '#E11D48',
-    'Otros': '#64748B'
-  };
+  window.addEventListener('resize', resizeAndDraw);
+  resizeAndDraw();
 
-  const fallbackColors = ['#10B981', '#2563EB', '#8B5CF6', '#F59E0B', '#06B6D4', '#EC4899', '#64748B'];
+  // Interactividad y Tooltips
+  let activeTooltip = null;
 
-  const centerX = width * 0.28;
-  const centerY = height * 0.5;
-  const outerRadius = Math.min(centerX, centerY) - 16;
-  const innerRadius = outerRadius * 0.64;
+  canvas.addEventListener('mousemove', function(e) {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
 
-  let startAngle = -Math.PI / 2;
+    const points = canvas._chartPoints || [];
+    let closest = null;
+    let minDistance = 25;
 
-  values.forEach((val, i) => {
-    const label = labels[i];
-    const sliceAngle = (val / total) * (Math.PI * 2);
-    const endAngle = startAngle + sliceAngle;
-    const color = categoryColors[label] || fallbackColors[i % fallbackColors.length];
+    points.forEach(p => {
+      const dist = Math.hypot(p.x - mouseX, p.y - mouseY);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closest = p;
+      }
+    });
 
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, outerRadius, startAngle, endAngle);
-    ctx.arc(centerX, centerY, innerRadius, endAngle, startAngle, true);
-    ctx.closePath();
-
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    startAngle = endAngle;
+    if (closest !== activeTooltip) {
+      activeTooltip = closest;
+      resizeAndDraw();
+      if (closest) {
+        drawTooltip(ctx, closest);
+      }
+    }
   });
 
-  // Centro de la dona (Suma en Soles)
-  ctx.fillStyle = '#0F172A';
-  ctx.font = '800 16px Inter, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('S/ ' + Math.round(total), centerX, centerY - 8);
-
-  ctx.fillStyle = '#64748B';
-  ctx.font = '600 10px Inter, sans-serif';
-  ctx.fillText('TOTAL', centerX, centerY + 12);
-
-  // Leyenda a la derecha
-  const legendX = width * 0.56;
-  const visibleItems = labels.slice(0, 6);
-  const startY = Math.max(20, (height - (visibleItems.length * 26)) / 2 + 10);
-
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-
-  visibleItems.forEach((label, i) => {
-    const y = startY + i * 26;
-    const color = categoryColors[label] || fallbackColors[i % fallbackColors.length];
-    const pct = Math.round((values[i] / total) * 100);
-
-    // Cuadro de color
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(legendX + 6, y, 5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Texto de la categoría
-    ctx.fillStyle = '#0F172A';
-    ctx.font = '600 11.5px Inter, sans-serif';
-    ctx.fillText(label, legendX + 16, y);
-
-    // Porcentaje
-    ctx.fillStyle = '#64748B';
-    ctx.font = '500 11px Inter, sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(`${pct}%`, width - 15, y);
-    ctx.textAlign = 'left';
+  canvas.addEventListener('mouseleave', function() {
+    if (activeTooltip) {
+      activeTooltip = null;
+      resizeAndDraw();
+    }
   });
 }
 
-// 2. Gráfico de Evolución Temporal
-function renderTrendChart(canvasId, labels, values) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.getBoundingClientRect();
-
-  canvas.width = (rect.width || 600) * dpr;
-  canvas.height = (rect.height || 260) * dpr;
-  ctx.scale(dpr, dpr);
-
-  const width = canvas.width / dpr;
-  const height = canvas.height / dpr;
-
+function drawChart(ctx, width, height, labels, values) {
   ctx.clearRect(0, 0, width, height);
 
-  if (!values || values.length === 0) {
-    ctx.fillStyle = '#94A3B8';
-    ctx.font = '500 13px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Sin registros suficientes para graficar evolución', width / 2, height / 2);
-    return;
-  }
+  const padLeft = 65;
+  const padRight = 30;
+  const padTop = 30;
+  const padBottom = 45;
 
-  const paddingLeft = 65;
-  const paddingRight = 25;
-  const paddingTop = 25;
-  const paddingBottom = 40;
+  const chartW = width - padLeft - padRight;
+  const chartH = height - padTop - padBottom;
 
-  const chartW = width - paddingLeft - paddingRight;
-  const chartH = height - paddingTop - paddingBottom;
-
-  const maxVal = Math.max(...values, 50) * 1.15;
+  const maxVal = Math.max(...values, 100) * 1.15;
   const minVal = 0;
 
-  // Líneas de cuadrícula
+  // 1. Líneas de Cuadrícula Horizontales y Eje Y
   const gridSteps = 4;
   ctx.strokeStyle = '#F1F5F9';
   ctx.lineWidth = 1;
@@ -183,64 +98,137 @@ function renderTrendChart(canvasId, labels, values) {
   ctx.textAlign = 'right';
 
   for (let i = 0; i <= gridSteps; i++) {
-    const y = paddingTop + (chartH / gridSteps) * i;
+    const y = padTop + (chartH / gridSteps) * i;
     const val = maxVal - (maxVal / gridSteps) * i;
 
     ctx.beginPath();
-    ctx.moveTo(paddingLeft, y);
-    ctx.lineTo(width - paddingRight, y);
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(width - padRight, y);
     ctx.stroke();
 
-    ctx.fillText('S/ ' + Math.round(val), paddingLeft - 10, y + 4);
+    ctx.fillText('S/ ' + Math.round(val), padLeft - 12, y + 4);
   }
 
-  // Puntos
+  if (values.length === 0) return;
+
+  // 2. Coordenadas de los Puntos
   const points = values.map((val, idx) => {
-    const x = paddingLeft + (chartW / (values.length - 1 || 1)) * idx;
-    const y = paddingTop + chartH - ((val - minVal) / (maxVal - minVal)) * chartH;
+    const x = padLeft + (chartW / (values.length - 1 || 1)) * idx;
+    const y = padTop + chartH - ((val - minVal) / (maxVal - minVal)) * chartH;
     return { x, y, val, label: labels[idx] };
   });
 
-  // Área sombreada con degradado esmeralda / azul
-  const grad = ctx.createLinearGradient(0, paddingTop, 0, paddingTop + chartH);
-  grad.addColorStop(0, 'rgba(16, 185, 129, 0.22)');
-  grad.addColorStop(1, 'rgba(16, 185, 129, 0.01)');
+  // Guardar puntos para interacción con cursor
+  ctx.canvas._chartPoints = points;
 
+  // 3. Trazado del Área con Curva Suavizada (Catmull-Rom / Spline Cúbico)
+  const spline = getSplinePath(points);
+
+  // Área con Degradado Fucsia -> Morado -> Azul Profundo (Exacto a la Imagen 1)
+  const areaGrad = ctx.createLinearGradient(0, padTop, 0, padTop + chartH);
+  areaGrad.addColorStop(0, '#F326A5');
+  areaGrad.addColorStop(0.45, '#A500D6');
+  areaGrad.addColorStop(1, '#3021C5');
+
+  ctx.save();
   ctx.beginPath();
-  ctx.moveTo(points[0].x, paddingTop + chartH);
-  points.forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.lineTo(points[points.length - 1].x, paddingTop + chartH);
+  ctx.moveTo(points[0].x, padTop + chartH);
+  ctx.lineTo(points[0].x, points[0].y);
+  spline(ctx);
+  ctx.lineTo(points[points.length - 1].x, padTop + chartH);
   ctx.closePath();
-  ctx.fillStyle = grad;
+  ctx.fillStyle = areaGrad;
   ctx.fill();
+  ctx.restore();
 
-  // Línea principal
+  // 4. Línea de Contorno Superior Suavizada
+  ctx.save();
   ctx.beginPath();
   ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) {
-    ctx.lineTo(points[i].x, points[i].y);
-  }
-  ctx.strokeStyle = '#10B981';
-  ctx.lineWidth = 3;
+  spline(ctx);
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth = 3.5;
   ctx.stroke();
+  ctx.restore();
 
-  // Puntos en la línea
+  // 5. Puntos de Datos y Eje X
   ctx.textAlign = 'center';
   points.forEach((p, idx) => {
+    // Halo blanco
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
     ctx.fillStyle = '#FFFFFF';
     ctx.fill();
-    ctx.strokeStyle = '#1E3A8A';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
 
-    // Etiqueta del eje X
-    if (points.length <= 10 || idx % 2 === 0 || idx === points.length - 1) {
-      ctx.fillStyle = '#64748B';
-      ctx.font = '500 10.5px Inter, sans-serif';
-      const labelShort = p.label.length > 5 ? p.label.substring(5) : p.label;
-      ctx.fillText(labelShort, p.x, height - 12);
+    // Centro fucsia/morado
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#A500D6';
+    ctx.fill();
+
+    // Etiqueta de fecha (Formato: DD/MM o DD Mes)
+    ctx.fillStyle = '#64748B';
+    ctx.font = '600 11px Inter, sans-serif';
+    let dateStr = p.label;
+    if (dateStr.includes('-')) {
+      const parts = dateStr.split('-');
+      const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
+      const mIdx = parseInt(parts[1], 10) - 1;
+      dateStr = `${parts[2]} ${meses[mIdx] || parts[1]}`;
     }
+    ctx.fillText(dateStr, p.x, height - 14);
   });
+}
+
+// Función para generar curvas cúbicas suaves (Spline)
+function getSplinePath(points) {
+  return function(ctx) {
+    if (points.length < 2) return;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i === 0 ? i : i - 1];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
+
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+    }
+  };
+}
+
+// Tooltip flotante con información del gasto
+function drawTooltip(ctx, point) {
+  ctx.save();
+  const text = `S/ ${point.val.toFixed(2)}`;
+  ctx.font = '700 12px Inter, sans-serif';
+  const width = ctx.measureText(text).width + 24;
+  const height = 28;
+
+  let x = point.x - width / 2;
+  let y = point.y - height - 12;
+
+  // Marco oscuro redondeado
+  ctx.fillStyle = '#0F172A';
+  ctx.beginPath();
+  ctx.roundRect ? ctx.roundRect(x, y, width, height, 6) : ctx.rect(x, y, width, height);
+  ctx.fill();
+
+  // Flecha indicadora
+  ctx.beginPath();
+  ctx.moveTo(point.x - 5, y + height);
+  ctx.lineTo(point.x + 5, y + height);
+  ctx.lineTo(point.x, y + height + 5);
+  ctx.closePath();
+  ctx.fill();
+
+  // Texto
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, point.x, y + height / 2);
+  ctx.restore();
 }

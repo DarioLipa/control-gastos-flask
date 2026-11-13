@@ -17,27 +17,42 @@ pages = [
     {
         "url": "/login",
         "output": "docs/capturas/01_login.png",
-        "inject": None
+        "size": "1920,1080"
     },
     {
         "url": "/dashboard?demo=1",
         "output": "docs/capturas/02_dashboard.png",
-        "inject": None
+        "size": "1920,1080"
     },
     {
         "url": "/gastos?demo=1",
         "output": "docs/capturas/03_gastos.png",
-        "inject": None
+        "size": "1920,1080"
     },
     {
         "url": "/reportes?demo=1",
         "output": "docs/capturas/04_reportes.png",
-        "inject": None
+        "size": "1920,1080"
+    },
+    {
+        "url": "/dashboard?demo=1",
+        "output": "docs/capturas/dashboard_1366x768.png",
+        "size": "1366,768"
+    },
+    {
+        "url": "/dashboard?demo=1",
+        "output": "docs/capturas/dashboard_768x1024.png",
+        "size": "768,1024"
+    },
+    {
+        "url": "/dashboard?demo=1",
+        "output": "docs/capturas/dashboard_390x844.png",
+        "size": "390,844"
     }
 ]
 
 for p in pages:
-    print(f"Generando {p['output']}...")
+    print(f"Generando {p['output']} en {p['size']}...")
     res = client.get(p["url"])
     html_content = res.data.decode("utf-8")
 
@@ -59,7 +74,7 @@ for p in pages:
         "--disable-gpu",
         "--hide-scrollbars",
         f"--user-data-dir={profile_dir}",
-        "--window-size=1920,1080",
+        f"--window-size={p['size']}",
         f"--screenshot={out_path}",
         file_url
     ]

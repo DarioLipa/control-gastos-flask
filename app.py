@@ -182,10 +182,18 @@ def dashboard():
         ORDER BY total_cat DESC
     ''').fetchall()
 
-    # Top categorías para ranking visual
+    # Categoría con mayor gasto para Tarjeta 3
+    max_categoria = None
+    if por_categoria:
+        max_categoria = {
+            'nombre': por_categoria[0]['categoria'],
+            'monto': por_categoria[0]['total_cat']
+        }
+
+    # Distribución de categorías para el panel de barras de progreso
     total_acumulado = stats['total_gastos'] or 1
     top_categorias = []
-    for row in por_categoria[:4]:
+    for row in por_categoria:
         pct = (row['total_cat'] / total_acumulado) * 100
         top_categorias.append({
             'categoria': row['categoria'],
@@ -209,6 +217,7 @@ def dashboard():
         'dashboard.html',
         stats=stats,
         total_mes=total_mes,
+        max_categoria=max_categoria,
         var_mes=var_mes,
         nombre_mes=nombre_mes,
         top_categorias=top_categorias,
